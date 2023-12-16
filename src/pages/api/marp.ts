@@ -19,6 +19,8 @@ export const markdownToPdf =async (context:{markdown:string}):Promise<{
 }
 
 const chromePath = await chromium.executablePath
+
+console.log({chromePath})
 const tempMdFilePath = `/tmp/pdf.md`
 const tempPdfFilePath = `/tmp/pdf.pdf`
 
