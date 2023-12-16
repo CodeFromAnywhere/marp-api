@@ -25,7 +25,7 @@ export const markdownToPdf =async (context:{markdown:string}):Promise<{
 }
 
 const chromePath = await chromium.executablePath(
-  `https://github.com/Sparticuz/chromium/releases/download/v116.0.0/chromium-v116.0.0-pack.tar`
+  `https://github.com/Sparticuz/chromium/releases/download/v119.0.0/chromium-v119.0.0-pack.tar`
 )
 
 console.log({chromePath})
