@@ -3,9 +3,15 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { marpCli } from "@marp-team/marp-cli"
 import fs from "fs";
 import { put,list,del } from "@vercel/blob";
-import chromium from "chrome-aws-lambda";
+import chromium from "@sparticuz/chromium-min";
  
 
+/**
+TODO:
+
+https://github.com/Sparticuz/chromium#-min-package
+
+ */
 export const markdownToPdf =async (context:{markdown:string}):Promise<{
   isSuccessful:boolean;
   message:string;
@@ -18,7 +24,9 @@ export const markdownToPdf =async (context:{markdown:string}):Promise<{
     return {isSuccessful:false,message:"Please provide markdown"}
 }
 
-const chromePath = await chromium.executablePath
+const chromePath = await chromium.executablePath(
+  `https://github.com/Sparticuz/chromium/releases/download/v116.0.0/chromium-v116.0.0-pack.tar`
+)
 
 console.log({chromePath})
 const tempMdFilePath = `/tmp/pdf.md`
