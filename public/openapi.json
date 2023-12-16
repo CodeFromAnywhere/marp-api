@@ -1,0 +1,61 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Marp API",
+    "version": "1.0",
+    "description": "Marp API"
+  },
+  "servers": [
+    {
+      "url": "https://marp-api.vercel.app",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/api/marp": {
+      "post": {
+        "operationId": "marp",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "markdown": {
+                    "type": "string",
+                    "description": "A MARP Markdown string to generate a pdf for"
+                  }
+                },
+                "required": ["markdown"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Standard response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Message about the result"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {}
+  }
+}
