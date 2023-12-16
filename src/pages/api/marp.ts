@@ -3,7 +3,8 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { marpCli } from "@marp-team/marp-cli"
 import fs from "fs";
 import { put,list,del } from "@vercel/blob";
-
+import chromium from "chrome-aws-lambda";
+ 
 
 export const markdownToPdf =async (context:{markdown:string}):Promise<{
   isSuccessful:boolean;
@@ -17,12 +18,13 @@ export const markdownToPdf =async (context:{markdown:string}):Promise<{
     return {isSuccessful:false,message:"Please provide markdown"}
 }
 
+const chromePath = await chromium.executablePath
 const tempMdFilePath = `/tmp/pdf.md`
 const tempPdfFilePath = `/tmp/pdf.pdf`
 
 fs.writeFileSync(tempMdFilePath,markdown,"utf8");
 
-await marpCli([tempMdFilePath, '--pdf'])
+await marpCli([`CHROME_PATH=${chromePath}`,tempMdFilePath, '--pdf'])
 .then((exitStatus:any) => {
   if (exitStatus > 0) {
     console.error(`Failure (Exit status: ${exitStatus})`)
