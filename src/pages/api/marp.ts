@@ -5,59 +5,44 @@ import fs from "fs";
 import { put,list,del } from "@vercel/blob";
 
 
-type Data = {
+export const markdownToPdf =async (context:{markdown:string}):Promise<{
   isSuccessful:boolean;
   message:string;
   url?:string;
-}
+}> => {
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Data>
-) {
-
-  const markdown = req.body.markdown as string;
+  const {markdown} = context;
 
   if(!markdown ||typeof markdown !=="string"){
-      res.status(422).json({isSuccessful:false,message:"Please provide markdown"})
-      return;
+    return {isSuccessful:false,message:"Please provide markdown"}
+}
+
+fs.writeFileSync('pdf.md',markdown,"utf8");
+
+await marpCli(['pdf.md', '--pdf'])
+.then((exitStatus:any) => {
+  if (exitStatus > 0) {
+    console.error(`Failure (Exit status: ${exitStatus})`)
+  } else {
+    console.log('Success');
+
+    return
+  
   }
+})
+.catch(console.error);
 
-  fs.writeFileSync('pdf.md',markdown,"utf8");
-
-  await marpCli(['pdf.md', '--pdf'])
-  .then((exitStatus:any) => {
-    if (exitStatus > 0) {
-      console.error(`Failure (Exit status: ${exitStatus})`)
-    } else {
-      console.log('Success');
-
-      return
-    
-    }
-  })
-  .catch(console.error);
-
-
-  // TODO: this is great, but it's better if this thing responds with an URL
-  // that contains the pdf so you can download it there.
   const buffer = fs.readFileSync('pdf.pdf')
-  const size = fs.statSync("pdf.pdf")
-
   const { url } = await put('pdf.pdf', buffer, { access: 'public' });
 
-  
-  // res.setHeader('Content-Type', 'application/pdf');
-  // res.setHeader('Content-Disposition', 'attachment; filename=pdf.pdf');
-  // res.setHeader('Content-Length', size.size);
-  // res.write(buffer, 'binary');
-  // res.end();
+  deleteOldItems()
 
- res.status(200).json({ isSuccessful:true,message:"Got pdf",url })
 
- deleteOldItems()
-
+  return {isSuccessful:true,message:"Got pdf", url }
 }
+
+// TODO: This could be a way to tell my system to deploy this stuff
+markdownToPdf.config= {makeNextApi:true}
 
 const deleteOldItems = async () => {
   const {blobs} = await list()
@@ -80,4 +65,8 @@ const deleteOldItems = async () => {
  } else{
   console.log("NOthing to del")
  }
+}
+
+export default async function handler(req: NextApiRequest,res: NextApiResponse) {
+ res.status(200).json(await markdownToPdf(req.body))
 }
