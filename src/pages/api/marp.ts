@@ -17,9 +17,12 @@ export const markdownToPdf =async (context:{markdown:string}):Promise<{
     return {isSuccessful:false,message:"Please provide markdown"}
 }
 
-fs.writeFileSync('pdf.md',markdown,"utf8");
+const tempMdFilePath = `/tmp/pdf.md`
+const tempPdfFilePath = `/tmp/pdf.pdf`
 
-await marpCli(['pdf.md', '--pdf'])
+fs.writeFileSync(tempMdFilePath,markdown,"utf8");
+
+await marpCli([tempMdFilePath, '--pdf'])
 .then((exitStatus:any) => {
   if (exitStatus > 0) {
     console.error(`Failure (Exit status: ${exitStatus})`)
@@ -32,8 +35,8 @@ await marpCli(['pdf.md', '--pdf'])
 })
 .catch(console.error);
 
-  const buffer = fs.readFileSync('pdf.pdf')
-  const { url } = await put('pdf.pdf', buffer, { access: 'public' });
+  const buffer = fs.readFileSync(tempPdfFilePath)
+  const { url } = await put(tempPdfFilePath, buffer, { access: 'public' });
 
   deleteOldItems()
 
