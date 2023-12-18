@@ -34,6 +34,6 @@ export default async function handler(req: NextApiRequest,res: NextApiResponse) 
 
   const { url } = await put("temp/marp.md", markdown, { access: 'public' });
 
-  res.status(200).redirect(`/?url=${url}`);
+  res.status(200).json({url:`https://marp-api.vercel.app/?url=${url}`});
 
 }
