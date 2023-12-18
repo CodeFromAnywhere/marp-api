@@ -25,3 +25,13 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+@media print{
+  body * {display:none;}
+  .toPrint{display:block; border:0; width:100%; min-height:500px}
+}
+
+
+.editor {
+  resize: none;
+}

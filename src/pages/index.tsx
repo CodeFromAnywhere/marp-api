@@ -1,86 +1,59 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import {  GetServerSideProps, GetStaticProps } from 'next'
+import { Inter } from "next/font/google";
+import { GetServerSideProps, GetStaticProps } from "next";
+import { Marpit } from "@marp-team/marpit";
+import { FormEvent, FormEventHandler, useEffect, useState } from "react";
+import { useHorizontalDraggableDiv } from "@/components/useHorizontalDraggableDiv";
+import { getMdHtml } from "@/components/getMdHtml";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
-import {Marpit} from '@marp-team/marpit'
-import { useEffect, useState } from 'react'
+export default function Home(props: { markdown: string }) {
+  const [isClient, setIsClient] = useState(false);
 
-export default function Home(props:{markdown:string}) {
+  useHorizontalDraggableDiv(true);
 
-  const [isClient, setIsClient] = useState(false)
- 
   useEffect(() => {
-    setIsClient(true)
-  }, [])
+    setIsClient(true);
+  }, []);
 
-  const {markdown} = props;
-  const [md,setMd]=useState(markdown);
+  const { markdown } = props;
+  const [md, setMd] = useState(markdown);
+  const htmlFile = getMdHtml(md);
 
-  // 1. Create instance (with options if you want)
-  const marpit = new Marpit()
+  return isClient ? (
+    <main className={`${inter.className} w-screen h-screen`}>
+      <div className={"flex w-full h-full"}>
+        <div className="flex flex-1">
+          <textarea
+            className="flex flex-1"
+            onChange={(e) => setMd(e.target.value)}
+          >
+            {md}
+          </textarea>
+        </div>
 
-// 2. Add theme CSS
-const theme = `
-/* @theme example */
-
-section {
-  background-color: #369;
-  color: #fff;
-  font-size: 30px;
-  padding: 40px;
-}
-
-h1,
-h2 {
-  text-align: center;
-  margin: 0;
-}
-
-h1 {
-  color: #8cf;
-}
-`
-marpit.themeSet.default = marpit.themeSet.add(theme)
-
-// 3. Render markdown
-
-const { html, css } = marpit.render(md)
-
-// 4. Use output in your HTML
-const htmlFile = `
-<!DOCTYPE html>
-<html><body>
-  <style>${css}</style>
-  ${html}
-</body></html>
-`;
-
-  return isClient?(
-    <main
-      className={`${inter.className}`}
-    >
-        <style>{css}</style>
-
-        <div dangerouslySetInnerHTML={{__html:html}}></div>
-
+        <div className="flex flex-1 toPrint">
+          <iframe className="toPrint w-full h-full" srcDoc={htmlFile} />
+        </div>
+      </div>
     </main>
-  ):<div>Loading</div>
+  ) : (
+    <div>Loading</div>
+  );
 }
 
-export const getServerSideProps: GetServerSideProps =async (context)=>{
-const url = context.query?.url;
-const realUrl =Array.isArray(url)?url?.[0]:url;
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const url = context.query?.url;
+  const realUrl = Array.isArray(url) ? url?.[0] : url;
 
-if(!realUrl){
-  return{notFound:true};
-}
+  if (!realUrl) {
+    return { notFound: true };
+  }
 
-const response = await  fetch(realUrl,{method:"GET"});
+  const response = await fetch(realUrl, { method: "GET" });
 
-const markdown=  await response.text()
+  const markdown = await response.text();
 
-  const props ={markdown}
-  return {props}
-}
+  const props = { markdown };
+  return { props };
+};
