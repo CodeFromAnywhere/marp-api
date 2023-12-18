@@ -1,64 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { marpCli } from "@marp-team/marp-cli"
-import fs from "fs";
 import { put,list,del } from "@vercel/blob";
-import chromium from "@sparticuz/chromium-min";
  
-
-/**
-TODO:
-
-https://github.com/Sparticuz/chromium#-min-package
-
- */
-export const markdownToPdf =async (context:{markdown:string}):Promise<{
-  isSuccessful:boolean;
-  message:string;
-  url?:string;
-}> => {
-
-  const {markdown} = context;
-////
-  if(!markdown ||typeof markdown !=="string"){
-    return {isSuccessful:false,message:"Please provide markdown"}
-}
-
-const chromePath = await chromium.executablePath(
-  `https://github.com/Sparticuz/chromium/releases/download/v119.0.0/chromium-v119.0.0-pack.tar`
-)
-
-console.log({chromePath})
-const tempMdFilePath = `/tmp/pdf.md`
-const tempPdfFilePath = `/tmp/pdf.pdf`
-
-fs.writeFileSync(tempMdFilePath,markdown,"utf8");
-
-await marpCli([`CHROME_PATH=${chromePath}`,tempMdFilePath, '--pdf'])
-.then((exitStatus:any) => {
-  if (exitStatus > 0) {
-    console.error(`Failure (Exit status: ${exitStatus})`)
-  } else {
-    console.log('Success');
-
-    return
-  
-  }
-})
-.catch(console.error);
-
-  const buffer = fs.readFileSync(tempPdfFilePath)
-  const { url } = await put(tempPdfFilePath, buffer, { access: 'public' });
-
-  deleteOldItems()
-
-
-  return {isSuccessful:true,message:"Got pdf", url }
-}
-
-// TODO: This could be a way to tell my system to deploy this stuff
-markdownToPdf.config= {makeNextApi:true}
-
 const deleteOldItems = async () => {
   const {blobs} = await list()
 
@@ -83,5 +26,14 @@ const deleteOldItems = async () => {
 }
 
 export default async function handler(req: NextApiRequest,res: NextApiResponse) {
- res.status(200).json(await markdownToPdf(req.body))
+
+  const markdown = req.body.markdown;
+  if(typeof markdown !=="string"){
+    res.status(421).json({isSuccessful:false,message:"Please provide markdown"})
+  }
+
+  const { url } = await put("temp/marp.md", markdown, { access: 'public' });
+
+  res.status(200).redirect(`/?url=${url}`);
+
 }
