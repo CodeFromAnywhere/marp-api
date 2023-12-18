@@ -2,7 +2,7 @@ import { Marpit } from "@marp-team/marpit";
 
 export const getMdHtml = (markdown:string)=>{
       // 1. Create instance (with options if you want)
-  const marpit = new Marpit({printable:true});
+  const marpit = new Marpit({printable:true,inlineSVG:true});
 
   // 2. Add theme CSS
   const theme = `
