@@ -32,7 +32,7 @@ export default function Home(props: { markdown: string }) {
           </textarea>
         </div>
 
-        <div className="flex flex-1 toPrint">
+        <div className="flex flex-1">
           <iframe className="toPrint w-full h-full" srcDoc={htmlFile} />
         </div>
       </div>
