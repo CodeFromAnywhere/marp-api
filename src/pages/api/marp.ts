@@ -8,7 +8,7 @@ const deleteOldItems = async () => {
  const urlsToDelete = blobs.map(item =>{
 
   const msAgo = Date.now() - item.uploadedAt.valueOf();
-
+//maxage 15minutes
   const isOld = msAgo > 900000;
 
   if(!isOld){
@@ -31,6 +31,8 @@ export default async function handler(req: NextApiRequest,res: NextApiResponse) 
   if(typeof markdown !=="string"){
     res.status(421).json({isSuccessful:false,message:"Please provide markdown"})
   }
+
+  deleteOldItems()
 
   const { url } = await put("temp/marp.md", markdown, { access: 'public' });
 
